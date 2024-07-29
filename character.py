@@ -34,6 +34,7 @@ class MainPlayer:
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.right > self.params_screen[0]:
+            print(self.rect.right)
             self.rect.right = self.params_screen[0]
         if self.rect.top < 0:
             self.rect.top = 0

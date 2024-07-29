@@ -10,6 +10,7 @@ class Obj:
         self.rect.topleft = coord
         self.old_position = self.rect.topleft
         self.color = color
+        self.size = size
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
