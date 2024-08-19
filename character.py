@@ -17,6 +17,7 @@ class MainPlayer:
         self.rect.topleft = coord
         self.old_position = self.rect.topleft
         self.speed = 4
+        self.main_direction = 1, 0
 
     def reset_position(self):
         self.rect.topleft = self.old_position
@@ -26,7 +27,13 @@ class MainPlayer:
         self.image.fill(code_color)
         self.name_color = name_color
 
-    def move(self, x, y):
+    def move(self):
+        self.old_position = self.rect.topleft
+        self.rect.x += self.speed * self.main_direction[0]
+        self.rect.y += self.speed * self.main_direction[1]
+
+    def move_control(self, x, y):
+        self.old_position = self.rect.topleft
         self.rect.x += self.speed * x
         self.rect.y += self.speed * y
 
@@ -45,13 +52,13 @@ class MainPlayer:
         self.old_position = self.rect.topleft  # Сохраняем старую позицию
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.move(-1, 0)
+            self.move_control(-1, 0)
         if keys[pygame.K_RIGHT]:
-            self.move(1, 0)
+            self.move_control(1, 0)
         if keys[pygame.K_UP]:
-            self.move(0, -1)
+            self.move_control(0, -1)
         if keys[pygame.K_DOWN]:
-            self.move(0, 1)
+            self.move_control(0, 1)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
@@ -106,3 +113,5 @@ class MainPlayer:
     #         elif (y > 0 and (x < 0 or x > 0)) and self.rect.top < obst.rect.top:
     #             print(4)
     #             self.rect.bottom = obst.rect.top
+
+

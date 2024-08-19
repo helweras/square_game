@@ -24,6 +24,7 @@ def underarm_right(self, obst):
 def collision(self, obst):
     if self.rect.colliderect(obst):
         x, y = self.get_direction()
+
         # Коллизии с препятствием при прямом столкновении
 
         if x > 0 and y == 0:  # справа

@@ -5,8 +5,14 @@ import time
 
 class Obj:
     def __init__(self):
-        self.size = (150, 20)
+        self.size = (10, 2)
         self.coord = ()
+
+
+class Bonus(Obj):
+    def __init__(self):
+        super().__init__()
+        self.size = (2, 2)
 
 
 def opt_func(func, *args):
@@ -21,29 +27,30 @@ def spawn(card: list, obj: Obj, h, w):
         for x in range(w, w + obj.size[0]):
             card[y][x] = 1
 
-
-v = []
+def spawn_bonus(pl_map, bonus: Bonus):
+    pass
 
 
 def control_spawn(count: int, pl_map: list):
     flag = 0
-    w = random.randint(50, 950)
-    h = random.randint(50, 1050)
+    w = random.randint(0, 10)
+    h = random.randint(0, 8)
     while flag < count:
-        if pl_map[w][h] == 0:
+        if pl_map[h][w] == 0:
             obj = Obj()
-            obj.coord = (h, w)
-            v.append(obj)
-            spawn(pl_map, obj, w, h)
+            obj.coord = (w, h)
+            spawn(pl_map, obj, h, w)
             flag += 1
-            w = random.randint(50, 950)
-            h = random.randint(50, 1050)
+            w = random.randint(0, 10)
+            h = random.randint(0, 8)
         else:
-            w = random.randint(50, 950)
-            h = random.randint(50, 1050)
+            w = random.randint(0, 10)
+            h = random.randint(0, 8)
 
 
-x = 1250  # пиксели в ширину
-y = 1000  # пиксели в высоту
+x = 20  # пиксели в ширину
+y = 10  # пиксели в высоту
 play_map = [[0 for i in range(x)] for j in range(y)]
 
+control_spawn(3, play_map)
+# print(*play_map, sep='\n')
