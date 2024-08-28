@@ -10,14 +10,17 @@ class MainPlayer:
         if color:
             self.name_color = color
         else:
-            self.color = (255, 0, 0)
-        self.image = pygame.Surface(size)
+            self.name_color = (255, 0, 0)
+        self.center = (size[0] / 2, size[1] / 2)
+        self.image = pygame.Surface(size, pygame.SRCALPHA)
+        # pygame.draw.circle(self.image, color=self.name_color, center=self.center, radius=self.center[1])
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.topleft = coord
         self.old_position = self.rect.topleft
-        self.speed = 4
+        self.speed = 1
         self.main_direction = 1, 0
+        self.draw_circle()
 
     def reset_position(self):
         self.rect.topleft = self.old_position
@@ -33,7 +36,6 @@ class MainPlayer:
         self.rect.y += self.speed * self.main_direction[1]
 
     def move_control(self, x, y):
-        self.old_position = self.rect.topleft
         self.rect.x += self.speed * x
         self.rect.y += self.speed * y
 
@@ -41,7 +43,6 @@ class MainPlayer:
         if self.rect.left < 0:
             self.rect.left = 0
         if self.rect.right > self.params_screen[0]:
-            print(self.rect.right)
             self.rect.right = self.params_screen[0]
         if self.rect.top < 0:
             self.rect.top = 0
@@ -60,8 +61,11 @@ class MainPlayer:
         if keys[pygame.K_DOWN]:
             self.move_control(0, 1)
 
+    def draw_circle(self):
+        pygame.draw.circle(self.image, color=(3, 123, 124), center=self.center, radius=self.center[1])
+
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image, self.rect.topleft)
 
     def get_direction(self):
         dx = self.rect.topleft[0] - self.old_position[0]
@@ -114,4 +118,9 @@ class MainPlayer:
     #             print(4)
     #             self.rect.bottom = obst.rect.top
 
+
+class Enemy(MainPlayer):
+    """Враги летящие на персонажа"""
+    def __init__(self, coord: tuple, width_screen, height_screen, size: tuple, color):
+        super().__init__(coord, width_screen, height_screen, size, color)
 

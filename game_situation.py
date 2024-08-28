@@ -1,8 +1,8 @@
-import pygame
-from character import MainPlayer
-import obj
-import sys
-import pygame
+# import pygame
+# from character import MainPlayer
+# import obj
+# import sys
+# import pygame
 
 
 def left(self, obst):
@@ -24,7 +24,6 @@ def underarm_right(self, obst):
 def collision(self, obst):
     if self.rect.colliderect(obst):
         x, y = self.get_direction()
-
         # Коллизии с препятствием при прямом столкновении
 
         if x > 0 and y == 0:  # справа
@@ -41,7 +40,8 @@ def collision(self, obst):
         elif (x < 0 and (y < 0 or y > 0)) and left(self, obst) and not underarm_left(self, obst):  # слева + верх и низ
             self.rect.left = obst.rect.right
 
-        elif (x > 0 and (y < 0 or y > 0)) and right(self, obst) and not underarm_right(self, obst):  # справа + верх и низ
+        elif (x > 0 and (y < 0 or y > 0)) and right(self, obst) and not underarm_right(self,
+                                                                                       obst):  # справа + верх и низ
             self.rect.right = obst.rect.left
 
         elif (y < 0 and (x < 0 or x > 0)) and self.rect.bottom > obst.rect.bottom:
@@ -49,3 +49,4 @@ def collision(self, obst):
 
         elif (y > 0 and (x < 0 or x > 0)) and self.rect.top < obst.rect.top:
             self.rect.bottom = obst.rect.top
+        return True
