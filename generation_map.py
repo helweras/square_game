@@ -1,96 +1,59 @@
 import pygame
-import random
-import time
+import sys
 
 
-class Obj:
+class Character:
+    def __init__(self, width, height, x, y, images):
+        self.surface = pygame.Surface((width, height), pygame.SRCALPHA)
+        self.images = [pygame.image.load(img).convert_alpha() for img in images]
+        print(self.images)
+        self.current_image = 0
+        self.image = pygame.transform.scale(self.images[self.current_image], (width, height))
+        self.rect = self.surface.get_rect(topleft=(x, y))
+        self.mask = pygame.mask.from_surface(self.image)
+        self.animation_speed = 0.3  # Скорость анимации
+        self.time_passed = 0
+
+    def update(self, dt):
+        # Обновляем кадр анимации
+        self.time_passed += dt
+        if self.time_passed >= self.animation_speed:
+            self.current_image = (self.current_image + 1) % len(self.images)
+            self.image = pygame.transform.scale(self.images[self.current_image], (self.rect.width, self.rect.height))
+            self.mask = pygame.mask.from_surface(self.image)
+            self.time_passed = 0
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect.topleft)
+
+
+class Game:
     def __init__(self):
-        self.size = (10, 2)
-        self.coord = ()
+        pygame.init()
+        self.screen = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption('Character Animation')
+        # Замените на свои изображения анимации
+        self.character = Character(300, 300, 100, 100, ['player_image/pers.png',
+                                                        'player_image/Изготовка к прыжку.png',
+                                                        'player_image/Прыжок.png'])
+        self.clock = pygame.time.Clock()
+
+    def run(self):
+        while True:
+            dt = self.clock.tick(60) / 1000  # Дельта времени для обновления анимации
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            self.screen.fill((255, 255, 255))
+            self.character.update(dt)
+            self.character.draw(self.screen)
+
+            pygame.display.flip()
 
 
-class Bonus(Obj):
-    def __init__(self):
-        super().__init__()
-        self.size = (2, 2)
-
-
-def opt_func(func, *args):
-    start = time.perf_counter()
-    func(*args)
-    stop = time.perf_counter()
-    return stop - start
-
-
-def spawn(card: list, obj: Obj, h, w, mark):
-    for y in range(h, h + obj.size[1]):
-        for x in range(w, w + obj.size[0]):
-            card[y][x] = mark
-
-
-def spawn_bonus(pl_map, bonus: Bonus):
-    pass
-
-
-def control_spawn(count: int, pl_map: list):
-    flag = 0
-    w = random.randint(0, 10)
-    h = random.randint(0, 8)
-    while flag < count:
-        if pl_map[h][w] == 0:
-            obj = Obj()
-            obj.coord = (w, h)
-            spawn(pl_map, obj, h, w, 1)
-            flag += 1
-            w = random.randint(0, 10)
-            h = random.randint(0, 8)
-        else:
-            w = random.randint(0, 10)
-            h = random.randint(0, 8)
-
-
-x = 20  # пиксели в ширину
-y = 10  # пиксели в высоту
-play_map = [[1 for i in range(x)] for j in range(y)]
-
-for i in range(0, 2):
-    for j in range(0, 5):
-        play_map[i][j] = 0
-
-
-# control_spawn(7, play_map)
-# print(*play_map, sep='\n')
-
-
-def check_area(g_map: list, size: tuple, index_x, index_y):
-    size_x, size_y = size
-    for i in range(index_y, index_y + size_y):
-        for j in range(index_x, index_x + size_x):
-            if g_map[i][j] != 0:
-                return False
-    return True
-
-
-def spawn2(x1, y1, count):
-    flag = 0
-    w = random.randint(0, y1 - 2)
-    h = random.randint(0, x1 - 5)
-    while flag != count:
-        if check_area(play_map, (5, 2), h, w):
-            print(h, w)
-            flag += 1
-            obj = Obj()
-            obj.size = (5, 2)
-            obj.coord = (w, h)
-            spawn(play_map, obj, w, h, 5)
-        else:
-            print(h, w)
-            w = random.randint(0, y1 - 2)
-            h = random.randint(0, x1 - 5)
-
-
-# print('\n\n\n-----------------------------------------------')
-# print(*play_map, sep='\n')
-ccc = None
-if ccc[0][0]:
-    print('xxx')
+x = [1,2,3,4]
+for i in x:
+    i += 5
+print(x)

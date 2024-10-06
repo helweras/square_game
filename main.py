@@ -14,27 +14,31 @@ class Game:
     def __init__(self):
         pygame.init()  # Инициация всех модулей, которые входят в состав Pygame
         self.name_color_background = 'Белый'
-        self.code_color_background = '#FFFFFF'
-        self.get_screen_info()
-        self.WIDTH, self.HEIGHT = 20, 10
+        self.code_color_background = '#2E8B57'
+        self.WIDTH, self.HEIGHT = self.get_screen_size(1000, 700)
         self.screen = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Collision Example")
         self.clock = pygame.time.Clock()
+        self.fps = 20
 
         self.RED = (255, 0, 0)
 
-        self.player = MainPlayer((220, 10), self.WIDTH, self.HEIGHT, color=self.RED, size=(50, 50))
+        self.player = None
         self.base = None
 
         self.obstacle = []
-        self.bonus = obj.Bonus((400, 150), self.WIDTH, self.HEIGHT, size=(30, 30), color=(0, 0, 0))
+        self.bonus = None
         self.play_map = None
         self.enemy_list = []
 
+        self.obst1 = None
+
     @staticmethod
-    def get_screen_info():
+    def get_screen_size(size_x=0, size_y=0):
         """Получение параметров экрана.
         Вовращает размеры экрана в пикселях"""
+        if size_x and size_y:
+            return size_x, size_y
         info = pygame.display.Info()
         return info.current_w, info.current_h
 
@@ -85,8 +89,9 @@ class Game:
         h = random.randrange(y_0 - indent_y_0, y_1 + 1 - (indent_y_1 + obstacle_y))
         while flag < count:
             if pl_map[h][w] == 0:
-                self.obstacle.append(obj.Obstacle((w, h), self.WIDTH, self.HEIGHT, size=size_obstacle))
+                # self.obstacle.append(obj.Obstacle((w, h), size=size_obstacle))
                 self.spawn(pl_map, size_obstacle, h, w, 1)
+                self.obst1 = obj.Obstacle((w, h), (100, 100))
                 flag += 1
                 w = random.randrange(x_0 - indent_x_0, x_1 + 1 - (indent_x_1 + obstacle_x))
                 h = random.randrange(y_0 - indent_y_0, y_1 + 1 - (indent_y_1 + obstacle_y))
@@ -129,25 +134,76 @@ class Game:
         y = random.randint(30, self.HEIGHT - 50)
         pass
 
-    def spawn_player(self, coord: tuple, size: tuple, color: tuple):
-        pass
+    def spawn_player(self, size: tuple, color: tuple):
+        x_size, y_size = size
+        create = False
+        w = random.randrange(0, self.WIDTH + 1 - x_size)
+        h = random.randrange(0, self.HEIGHT + 1 - y_size)
+        while not create:
+            if self.check_area(size, w, h):
+                self.player = MainPlayer(coord=(w, h), width_screen=self.WIDTH, height_screen=self.HEIGHT, size=size,
+                                         color=color)
+                self.spawn(self.play_map, size, h, w, 2)
+                create = True
+            else:
+                w = random.randrange(0, self.WIDTH + 1 - x_size)
+                h = random.randrange(0, self.HEIGHT + 1 - y_size)
 
-    def spawn_bonus(self, coord: tuple, size: tuple, color: tuple):
-        pass
+    def spawn_bonus(self, size: tuple, color: tuple):
+        x_size, y_size = size
+        create = False
+        w = random.randrange(0, self.WIDTH + 1 - x_size)
+        h = random.randrange(0, self.HEIGHT + 1 - y_size)
+        while not create:
+            if self.check_area(size, w, h):
+                self.bonus = obj.Bonus(coord=(w, h), size=size,
+                                       color=color)
+                self.spawn(self.play_map, size, h, w, 2)
+                create = True
+            else:
+                w = random.randrange(0, self.WIDTH + 1 - x_size)
+                h = random.randrange(0, self.HEIGHT + 1 - y_size)
+
+    def check_collision(self, obst, player: MainPlayer):
+        # Расчет смещения (offset) для проверки столкновения
+        offset = (obst.obstacle_rect.x - player.rect.x, obst.obstacle_rect.y - player.rect.y)
+
+        # Проверка на пересечение масок
+        collision_point = player.mask.overlap(obst.obstacle_mask, offset)
+
+        if collision_point:
+            print("Столкновение обнаружено в точке:", collision_point)
+            print(player.rect.topleft)
+
+    def move(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            self.player.rect.x -= 4
+        if keys[pygame.K_RIGHT]:
+            self.player.rect.x += 4
+        if keys[pygame.K_UP]:
+            self.player.rect.y -= 4
+        if keys[pygame.K_DOWN]:
+            self.player.rect.y += 4
 
     # def prerun(self):
     #     self.control_spawn_obstacle(10, self.gen_play_map(), self.WIDTH, self.HEIGHT)
 
     def run(self):
-        self.control_spawn_obstacle(2, self.gen_play_map(), (0, self.WIDTH), (0, self.HEIGHT), (20, 3))
+        dt = self.clock.tick(self.fps) / 1000
+        self.control_spawn_obstacle(1, self.gen_play_map(), (0, self.WIDTH), (0, self.HEIGHT), (130, 70))
+        self.spawn_player((300, 300), self.RED)
+        # self.spawn_bonus(size=(30, 30), color=(234, 213, 110))
         running = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            # self.player.update_position()
+            self.player.update_position(dt)
             # self.constant_movement(self.player)
             # Проверка столкновений с препятствием и границами экрана
+            self.check_collision(self.obst1, self.player)
+
             # self.player.stop_screen()
             # self.check_collision_obstacle(self.player)
 
@@ -163,19 +219,24 @@ class Game:
             #     if self.bonus.rect.right - self.WIDTH > -30:
             #         self.bonus.move(-self.WIDTH + 120, 0)
             #     else:
-            #         self.bonus.move(50, 0)
+            #         print(self.obstacle[0].rect.x)
+            #         print(self.obstacle[0].rect.y)
+            #         self.spawn_bonus(size=(30, 30), color=(234, 213, 110))
 
             self.screen.fill(self.code_color_background)
             self.screen.blit(text, text_rect)
-            # self.player.draw(self.screen)
-            for i in self.obstacle:
-                i.draw(self.screen)
-            self.bonus.draw(self.screen)
+            # self.player.animation(dt)
+            self.player.draw_in_screen(self.screen)
+            self.obst1.draw_in_screen(self.screen)
+            # self.screen.blit(self.obst1.surface, self.obst1.rect.topleft)
+            # for i in self.obstacle:
+            #     i.draw_in_screen(self.screen)
+            # self.bonus.draw_in_screen(self.screen)
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(self.fps)
 
         pygame.quit()
-        print(*self.play_map, sep='\n')
+        # print(*self.play_map, sep='\n')
         sys.exit()
 
 
